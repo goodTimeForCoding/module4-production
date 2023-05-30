@@ -261,52 +261,52 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const loadArticlesData = (renderArticles, isFullData) => {
-  fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].ARTICLES)
-    .then((response) => response.json())
-    .then((data) => {
-      isFullData ? renderArticles(data) : renderArticles(data.slice(0, 3));
-    })
-    .catch(() => {
-      Object(_view_alerts_js__WEBPACK_IMPORTED_MODULE_0__["showAlert"])('Не удалось загрузить данные с сервера', _const_js__WEBPACK_IMPORTED_MODULE_1__["ALERT_SHOW_TIME"]);
-    });
+const loadArticlesData = async (renderArticles, isFullData) => {
+  try {
+    const response = await fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].ARTICLES);
+    const data = await response.json();
+    isFullData ? renderArticles(data) : renderArticles(data.slice(0, 3));
+  } catch(e) {
+    Object(_view_alerts_js__WEBPACK_IMPORTED_MODULE_0__["showAlert"])('Не удалось загрузить данные с сервера', _const_js__WEBPACK_IMPORTED_MODULE_1__["ALERT_SHOW_TIME"]);
+  }
 };
 
-const loadFeaturedData = (renderFeaturedAticleTop, renderFeaturedAticleBottom = null) => {
-  fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].FEATURED)
-    .then((response) => response.json())
-    .then((data) => {
-      if (renderFeaturedAticleBottom) {
-        renderFeaturedAticleTop(data);
-        renderFeaturedAticleBottom(data);
-      }
+const loadFeaturedData = async (renderFeaturedAticleTop, renderFeaturedAticleBottom = null) => {
+  try {
+    const response = await fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].FEATURED);
+    const data = await response.json();
+    if (renderFeaturedAticleBottom) {
       renderFeaturedAticleTop(data);
-    })
-    .catch(() => {
-      Object(_view_alerts_js__WEBPACK_IMPORTED_MODULE_0__["showAlert"])('Не удалось загрузить данные с сервера', _const_js__WEBPACK_IMPORTED_MODULE_1__["ALERT_SHOW_TIME"]);
-    });
+      renderFeaturedAticleBottom(data);
+    }
+    renderFeaturedAticleTop(data);
+  } catch(e) {
+    Object(_view_alerts_js__WEBPACK_IMPORTED_MODULE_0__["showAlert"])('Не удалось загрузить данные с сервера', _const_js__WEBPACK_IMPORTED_MODULE_1__["ALERT_SHOW_TIME"]);
+  }
 };
 
-const loadAboutData = (renderAboutPage) => {
-  fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].ABOUT)
-    .then((response) => response.json())
-    .then((data) => {
-      renderAboutPage(data);
-    })
-    .catch(() => {
-      Object(_view_alerts_js__WEBPACK_IMPORTED_MODULE_0__["showAlert"])('Не удалось загрузить данные с сервера', _const_js__WEBPACK_IMPORTED_MODULE_1__["ALERT_SHOW_TIME"]);
-    });
+const loadAboutData = async (renderAboutPage) => {
+  try {
+    const response = await fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].ABOUT);
+    const data = await response.json();
+    renderAboutPage(data);
+  } catch(e) {
+    Object(_view_alerts_js__WEBPACK_IMPORTED_MODULE_0__["showAlert"])('Не удалось загрузить данные с сервера', _const_js__WEBPACK_IMPORTED_MODULE_1__["ALERT_SHOW_TIME"]);
+  }
 };
 
-const loadArticleData = (renderArticle, id) => {
-  fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].ARTICLE + id)
-    .then((response) => response.json())
-    .then((data) => {
-      renderArticle(data);
-    })
-    .catch(() => {
-      Object(_view_alerts_js__WEBPACK_IMPORTED_MODULE_0__["showAlert"])('Не удалось загрузить данные с сервера', _const_js__WEBPACK_IMPORTED_MODULE_1__["ALERT_SHOW_TIME"]);
-    });
+const loadArticleData = async (renderArticle, id) => {
+  try {
+    const response = await fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].ARTICLE + id);
+    const data = await response.json();
+    const responsePrevData = await fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].ARTICLE + data.prevId);
+    const prevData = await responsePrevData.json();
+    const responseNextData = await fetch(_const_js__WEBPACK_IMPORTED_MODULE_1__["Urls"].ARTICLE + data.nextId);
+    const nextData = await responseNextData.json();
+    renderArticle(data, prevData.title, nextData.title);
+  } catch(e) {
+    Object(_view_alerts_js__WEBPACK_IMPORTED_MODULE_0__["showAlert"])('Не удалось загрузить данные с сервера', _const_js__WEBPACK_IMPORTED_MODULE_1__["ALERT_SHOW_TIME"]);
+  }
 };
 
 
@@ -560,7 +560,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _utils_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../utils/utils.js */ "./src/utils/utils.js");
 
 
-const createArticleTemplate = (data) => {
+const createArticleTemplate = (data, prevData, nextData) => {
 
   const {author, createdAt, description, nextId, prevId, readTime, title, tag} = data;
   const {name, about, nick} = author;
@@ -599,18 +599,16 @@ const createArticleTemplate = (data) => {
   </section>
   <div class="article-slider article-slider__wrap">
     <a class="article-slider__link" href="#article/${prevItem}">
-      <span class="article-slider__btn-text article-slider__back-btn-text">Go back: <b>Boom boom pow is et Letstrade.</b></span>
+      <span class="article-slider__btn-text article-slider__back-btn-text">Go back: <b>${prevData}</b></span>
     </a>
     <form action="#article/${prevItem}" style="position:absolute">
-      <button class="button article-slider__button article-slider__button-back"
-      type="submit"><img src="assets/Back-Button.svg" alt="back button"></button>
+      <button class="button article-slider__button article-slider__button-back" type="submit"></button>
     </form>
     <a class="article-slider__link" href="#article/${nextItem}">
-      <span class="article-slider__btn-text article-slider__next-btn-text">Next up: <b>Lorem ipsum so Ceat Riak.</b></span>
+      <span class="article-slider__btn-text article-slider__next-btn-text">Next up: <b>${nextData}</b></span>
     </a>
     <form action="#article/${nextItem}" style="position:absolute; right:0px">
-      <button class="button article-slider__button article-slider__button-next" type="submit"><img
-      src="assets/Next-Button.svg" alt="next button"></button>
+      <button class="button article-slider__button article-slider__button-next" type="submit"></button>
     </form>
   </div>`;
 };
@@ -784,9 +782,9 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-const renderArticlePage = (articleDatum) => {
+const renderArticlePage = (articleDatum, prevArticleDatum, nextArticleDatum) => {
   const siteMainElement = document.querySelector('.page-main');
-  Object(_utils_utils_js__WEBPACK_IMPORTED_MODULE_1__["render"])(siteMainElement, Object(_components_article_detail_js__WEBPACK_IMPORTED_MODULE_0__["createArticleTemplate"])(articleDatum), 'beforeend');
+  Object(_utils_utils_js__WEBPACK_IMPORTED_MODULE_1__["render"])(siteMainElement, Object(_components_article_detail_js__WEBPACK_IMPORTED_MODULE_0__["createArticleTemplate"])(articleDatum, prevArticleDatum, nextArticleDatum), 'beforeend');
 };
 
 
